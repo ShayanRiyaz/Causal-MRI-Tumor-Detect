@@ -4,12 +4,12 @@ from torch.utils.data import Dataset
 import os
 import numpy as np
 from PIL import Image
+import cv2 as cv
 
 
 # Reshape (N,1,C,R) into (N,P^2,HWC/P^2)
 # Where P = Desired Patch Size
 # Convert Image into patches for transformer input
-
 def patchify(images,n_patches):
     n,c,h,w = images.shape
     
@@ -62,8 +62,20 @@ class MRIDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
         label = self.labels[idx]
-        image = Image.open(img_path).convert('L')
-        image = image.resize((self.image_shape , self.image_shape ))
+        # image = Image.open(img_path).convert('L')
+        image = cv.imread(img_path,cv.IMREAD_GRAYSCALE)
+        image = cv.resize(image,(self.image_shape , self.image_shape ))
+        image = cv.equalizeHist(image)
+        height, width = image.shape[:2]
+        center = (width/2, height/2)
+        rotate_matrix = cv.getRotationMatrix2D(center=center, angle=45, scale=1)
+        
+        if np.round(np.random.rand()) == 1:
+            if np.round(np.random.rand()) == 1:
+                image = cv.warpAffine(src=image, M=rotate_matrix, dsize=(width, height))
+            else:
+                image = cv.flip(image, 0) 
+         
         if self.transform:
             image = self.transform(image)
         return image, label
