@@ -40,7 +40,7 @@ class MRIDataset(Dataset):
     def __init__(self, root_dir, transform=None,image_shape=28,random_modification =False):
         self.transform = transform
         self.image_paths = []
-        # self.labels = []
+        self.labels = []
         self.image_shape = image_shape
         self.random_modification = random_modification
 
@@ -50,12 +50,12 @@ class MRIDataset(Dataset):
         for file in os.listdir(tumor_dir):
             if file.lower().endswith('.jpg') or file.lower().endswith('.jpeg'):
                 self.image_paths.append(os.path.join(tumor_dir, file))
-                # self.labels.append(1)
+                self.labels.append(1)
 
         for file in os.listdir(non_tumor_dir):
             if file.lower().endswith('.jpg') or file.lower().endswith('.jpeg'):
                 self.image_paths.append(os.path.join(non_tumor_dir, file))
-                # self.labels.append(0)
+                self.labels.append(0)
 
     def __len__(self):
         return len(self.image_paths)
