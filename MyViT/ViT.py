@@ -31,6 +31,7 @@ class MyViT(nn.Module):
         assert chw[1] % n_patches == 0, "Input shape not divisible by number of patches"
         assert chw[2] % n_patches == 0, "Input shape not divisible by number of patches"
         self.patch_size = (chw[1]/n_patches,chw[2]/n_patches)
+        
         # 1) Linear Mapper
         self.input_d = int(chw[0]*self.patch_size[0]*self.patch_size[1])
         self.linear_mapper = nn.Linear(self.input_d, self.hidden_d)
@@ -39,20 +40,13 @@ class MyViT(nn.Module):
         self.class_token = nn.Parameter(torch.rand(1,self.hidden_d))
 
         # 3) Positional Embedding
-        # self.pos_embed = nn.Parameter(
-        #                 torch.tensor(
-        #                 get_positional_embeddings(self.n_patches**2+1,self.hidden_d)
-        #                 )
-        #             )
-        # self.pos_embed_requires_grad = False
         self.register_buffer('positional_embeddings',get_positional_embeddings(n_patches**2+1,hidden_d),persistent=False)
    
         # 4 ) Transformer Encoder Blocks
         self.blocks = nn.ModuleList([MyViTBlock(hidden_d,n_heads) for _ in range(n_blocks)])
 
         self.mlp = nn.Sequential(nn.Linear(self.hidden_d,out_d),
-                                 nn.Softmax(dim = -1)
-                                 )
+                                 nn.Softmax(dim = -1))
     def forward(self,images):
         n,c,h,w = images.shape
         patches = patchify(images,self.n_patches).to(self.positional_embeddings.device)
