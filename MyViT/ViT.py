@@ -62,6 +62,20 @@ class MyViT(nn.Module):
         out = out[:,0]
         return self.mlp(out)
     
+    def get_features(self, images):
+        """
+        Processes images and returns the features from the class token,
+        before they are passed to the final classification MLP.
+        """
+        n, c, h, w = images.shape
+        patches = patchify(images, self.n_patches).to(self.positional_embeddings.device)
+        tokens = self.linear_mapper(patches)
+        tokens = torch.cat((self.class_token.expand(n, 1, -1), tokens), dim=1)
+        out = tokens + self.positional_embeddings.repeat(n, 1, 1)
+        for block in self.blocks:
+            out = block(out)
+        return out[:, 0]  # Return the class token representation
+    
 
 class MyMSA(nn.Module):
     def __init__(self,d,n_heads =2):
@@ -108,7 +122,6 @@ class MyViTBlock(nn.Module):
 
         self.norm1 = nn.LayerNorm(hidden_d)
         self.mhsa = MyMSA(hidden_d,n_heads)
-
 
         # Encoder Block
         self.norm2 = nn.LayerNorm(hidden_d)
