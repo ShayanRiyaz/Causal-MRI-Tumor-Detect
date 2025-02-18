@@ -45,8 +45,7 @@ class MyViT(nn.Module):
         # 4 ) Transformer Encoder Blocks
         self.blocks = nn.ModuleList([MyViTBlock(hidden_d,n_heads) for _ in range(n_blocks)])
 
-        self.mlp = nn.Sequential(nn.Linear(self.hidden_d,out_d),
-                                 nn.Softmax(dim = -1))
+        self.mlp = nn.Sequential(nn.Linear(self.hidden_d,out_d))
     def forward(self,images):
         n,c,h,w = images.shape
         patches = patchify(images,self.n_patches).to(self.positional_embeddings.device)

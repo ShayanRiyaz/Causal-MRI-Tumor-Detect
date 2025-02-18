@@ -37,7 +37,7 @@ def get_positional_embeddings(sequence_length,d):
 
 
 class MRIDataset(Dataset):
-    def __init__(self, root_dir, transform=None,image_shape=28,random_modification =False):
+    def __init__(self, root_dir, transform=None,image_shape=128,random_modification =False):
         self.transform = transform
         self.image_paths = []
         self.labels = []

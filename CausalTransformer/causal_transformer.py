@@ -4,17 +4,16 @@ from MyViT.ViT import MyViT
 from CausalVAE.causal_vae import CausalVAE
 
 class HybridModel(nn.Module):
-    def __init__(self,vit_config,vae_input_dim,vae_z_dim = 50,vae_hidden_dim = 400,num_classes=2):
+    def __init__(self,vit_config,vae_input_dim,vae_z_dim = 50,vae_hidden_dim = 400,num_classes=2,batch_size=128):
         super(HybridModel,self).__init__()
         self.vit = MyViT(**vit_config)
         self.causal_vae = CausalVAE(input_dim=vae_input_dim,z_dim=vae_z_dim,hidden_dim = vae_hidden_dim)
         vit_feature_dim = vit_config.get('hidden_d',8)
         fusion_dim = vit_feature_dim + vae_z_dim
         self.fusion_layer = nn.Sequential(
-            nn.Linear(fusion_dim,128),
+            nn.Linear(fusion_dim,batch_size),
             nn.ReLU(),
-            nn.Linear(128,num_classes),
-            nn.Softmax(dim=-1)
+            nn.Linear(batch_size,num_classes),# nn.Softmax(dim=-1) 
         )
 
 
